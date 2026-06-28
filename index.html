@@ -252,10 +252,10 @@
 
   <!-- 卡片 -->
   <div class="card-wrap">
-    <div class="card init" id="card" onclick="roll()">
-      <div class="emoji">👆</div>
-      <div class="title">点这里<br>或者点下面按钮</div>
-      <div class="desc">随机给你一件事做</div>
+    <div class="card" id="card" onclick="roll()">
+      <div class="emoji">🎯</div>
+      <div class="title">加载中……</div>
+      <div class="desc">马上就好</div>
     </div>
   </div>
 
@@ -440,8 +440,8 @@ function showToast(msg) {
 }
 
 // ============ 初始化 ============
-// 第一次自动展示一个
-setTimeout(() => roll(), 600);
+// 一加载就出结果
+roll();
 
 // ============ PWA 安装 ============
 if ('serviceWorker' in navigator) {
