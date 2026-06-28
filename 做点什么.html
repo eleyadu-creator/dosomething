@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>做点什么</title>
+<meta name="theme-color" content="#667eea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="做点什么">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0f0f1a;
+    color: #eee;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    user-select: none;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 440px;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 100dvh;
+  }
+
+  /* ---- 头部 ---- */
+  .header {
+    text-align: center;
+    padding-top: 10px;
+  }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 2px;
+  }
+  .header .sub {
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  /* ---- 标签筛选 ---- */
+  .tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .tag {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: #aaa;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tag.on {
+    background: rgba(100, 180, 255, 0.2);
+    border-color: rgba(100, 180, 255, 0.5);
+    color: #8cc8ff;
+  }
+
+  /* ---- 时间筛选 ---- */
+  .time-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+  .time-btn {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .time-btn.on {
+    background: rgba(255,180,100,0.15);
+    border-color: rgba(255,180,100,0.4);
+    color: #f0b060;
+  }
+
+  /* ---- 主卡片 ---- */
+  .card-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    perspective: 1000px;
+  }
+  .card {
+    background: linear-gradient(145deg, #1a1a30, #141428);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 24px;
+    padding: 36px 28px;
+    text-align: center;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card.flip {
+    transform: rotateY(90deg);
+    opacity: 0;
+  }
+  .card .emoji {
+    font-size: 64px;
+    transition: transform 0.3s;
+  }
+  .card .title {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .card .desc {
+    font-size: 14px;
+    color: #999;
+    line-height: 1.7;
+    max-width: 300px;
+  }
+  .card .meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: #666;
+  }
+  .card .meta span {
+    background: rgba(255,255,255,0.05);
+    padding: 4px 10px;
+    border-radius: 10px;
+  }
+
+  /* 初始状态 */
+  .card.init .emoji { font-size: 80px; }
+  .card.init .title { font-size: 18px; color: #777; font-weight: 400; }
+
+  /* ---- 按钮 ---- */
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .btn {
+    padding: 14px 32px;
+    border-radius: 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn-main {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    flex: 1;
+    max-width: 200px;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #aaa;
+    padding: 14px 24px;
+  }
+
+  /* ---- 计数器 ---- */
+  .counter {
+    text-align: center;
+    font-size: 12px;
+    color: #444;
+  }
+
+  /* ---- Toast ---- */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(100,120,255,0.3);
+    backdrop-filter: blur(10px);
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 10;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ---- 手指动画 ---- */
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .hint-arrow {
+    animation: bounce 1.5s ease-in-out infinite;
+    color: #667eea;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1>🎯 做点什么</h1>
+    <div class="sub">别刷短视频了，试试这些</div>
+  </div>
+
+  <!-- 类型标签 -->
+  <div class="tags" id="typeTags">
+    <button class="tag on" data-type="all">全部</button>
+    <button class="tag" data-type="move">🏃 动一动</button>
+    <button class="tag" data-type="make">✋ 动手做</button>
+    <button class="tag" data-type="think">🧠 动脑子</button>
+    <button class="tag" data-type="social">💬 社交</button>
+    <button class="tag" data-type="chill">😌 放松</button>
+  </div>
+
+  <!-- 时间 -->
+  <div class="time-row" id="timeBtns">
+    <button class="time-btn on" data-time="all">不限</button>
+    <button class="time-btn" data-time="5">5分钟</button>
+    <button class="time-btn" data-time="15">15分钟</button>
+    <button class="time-btn" data-time="30">半小时</button>
+    <button class="time-btn" data-time="60">1小时+</button>
+  </div>
+
+  <!-- 卡片 -->
+  <div class="card-wrap">
+    <div class="card init" id="card" onclick="roll()">
+      <div class="emoji">👆</div>
+      <div class="title">点这里<br>或者点下面按钮</div>
+      <div class="desc">随机给你一件事做</div>
+    </div>
+  </div>
+
+  <!-- 按钮 -->
+  <div class="btn-row">
+    <button class="btn btn-main" onclick="roll()">🎲 再来一个</button>
+    <button class="btn btn-ghost" id="likeBtn" onclick="likeIt()" style="display:none;">❤️ 就这个</button>
+  </div>
+
+  <div class="counter" id="counter">已经帮你找到了 0 个选项</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ 活动库 ============
+// type: move / make / think / social / chill
+// time: 分钟数
+
+const activities = [
+  // ---- 动一动 ----
+  { emoji:'🧘', title:'做 5 分钟拉伸', desc:'站起来，把手臂举过头顶，弯腰摸脚趾。你的脊椎会感谢你。', type:'move', time:5 },
+  { emoji:'🚶', title:'出去走一圈', desc:'不用很远，楼下绕一圈就行。换口气，看看天，感受风吹在脸上。', type:'move', time:15 },
+  { emoji:'💃', title:'放首歌，乱跳', desc:'关上门，放最嗨的歌，怎么跳都行，反正没人看。跳到出汗为止。', type:'move', time:15 },
+  { emoji:'🧹', title:'收拾一个角落', desc:'不是大扫除。就整理一张桌子、一个抽屉。干净的环境会让脑子也变清爽。', type:'move', time:15 },
+  { emoji:'🏃', title:'原地高抬腿 100 下', desc:'做完你会喘、会热、会觉得活着真好。然后喝一大杯水。', type:'move', time:5 },
+  { emoji:'🪴', title:'给植物浇水 / 去买一盆', desc:'照顾一个活的东西，看它生长。没有植物的话，去楼下花店买盆多肉。', type:'move', time:15 },
+  { emoji:'🚴', title:'骑共享单车兜风', desc:'不要目的地，就沿着一条没走过的路骑。注意安全，戴耳机听首歌。', type:'move', time:30 },
+  { emoji:'🧗', title:'去最近的公园走一圈', desc:'手机放口袋。数你看到了几只鸟、几条狗。跟遛弯的大爷点头打招呼。', type:'move', time:30 },
+  { emoji:'🏊', title:'去游泳', desc:'泡在水里的感觉跟人间任何一个姿势都不一样。不会游就泡着。', type:'move', time:60 },
+  { emoji:'🥾', title:'选一条没走过的小路', desc:'打开地图，找一条你没去过的街，走过去看看有什么。探险不需要去远方。', type:'move', time:60 },
+
+  // ---- 动手做 ----
+  { emoji:'🍳', title:'做一道没做过的菜', desc:'打开冰箱看看有什么。搜个菜谱跟着做。做成什么样都行，重点是过程。', type:'make', time:30 },
+  { emoji:'✍️', title:'手写一封信', desc:'写给谁都行——给十年后的自己，给一个老朋友，给今天帮了你的陌生人。用纸和笔。', type:'make', time:30 },
+  { emoji:'🎨', title:'画一张画', desc:'不用好看。拿张纸和笔，画你窗外的样子，或者画你脑子里乱七八糟的线条。', type:'make', time:15 },
+  { emoji:'📦', title:'扔掉 3 件不用的东西', desc:'断舍离入门版：找三件超过一年没碰过的东西，丢了或送人。', type:'make', time:15 },
+  { emoji:'🪡', title:'缝个扣子 / 补件衣服', desc:'那件掉了一个扣子的衬衫等你很久了。针线活比刷手机更有成就感。', type:'make', time:15 },
+  { emoji:'🎵', title:'整理你的歌单', desc:'建一个新歌单，用你此刻的心情命名。加 10 首歌进去，以后这就是你的"某年某月"。', type:'make', time:15 },
+  { emoji:'📱', title:'清理手机相册', desc:'删掉截图、重复照片、模糊的图。释放空间的同时释放大脑。', type:'make', time:15 },
+  { emoji:'🧩', title:'拼拼图 / 玩乐高', desc:'专注在形状和颜色上，让大脑暂时离开焦虑。手上有事做的时候，心最安静。', type:'make', time:60 },
+  { emoji:'✂️', title:'做手工', desc:'折纸、剪纸、捏黏土、编绳——手在忙的时候，脑子才有机会休息。', type:'make', time:30 },
+
+  // ---- 动脑子 ----
+  { emoji:'📖', title:'读一章书', desc:'不是刷手机看文章。拿一本真正的书，读一章。哪怕就读三页。', type:'think', time:15 },
+  { emoji:'🧩', title:'做一道数独 / 填字', desc:'让大脑换个频道。比刷短视频少一些空虚，多一些"我还可以啊"的感觉。', type:'think', time:15 },
+  { emoji:'🌍', title:'在维基百科随机漫游', desc:'点"随机条目"，读一个你完全不知道的东西。五分钟你就比刚才多知道了一点世界。', type:'think', time:15 },
+  { emoji:'✏️', title:'写日记', desc:'就写今天的三件事：一件开心的、一件不开心的、一件奇怪的。不写给别人看。', type:'think', time:15 },
+  { emoji:'🗣️', title:'学一句方言', desc:'搜你老家或者你喜欢的城市的方言，学一句。下次跟人说，对方会惊喜。', type:'think', time:5 },
+  { emoji:'🧮', title:'算算你这个月花了多少钱', desc:'打开支付记录，不用记很细，就看看大头花在哪。清醒了再继续。', type:'think', time:15 },
+  { emoji:'🎓', title:'学一个新技能', desc:'网上找个 15 分钟教程——折纸、魔术、Excel快捷键、手语字母表，什么都行。', type:'think', time:15 },
+  { emoji:'🗺️', title:'计划一次周末出行', desc:'不用真的去，只是查路线、查吃的、查住的地方。幻想本身就是一种享受。', type:'think', time:30 },
+  { emoji:'♟️', title:'跟 AI 下盘棋', desc:'象棋围棋五子棋都行。输赢不重要，让大脑换种方式运转。', type:'think', time:30 },
+
+  // ---- 社交 ----
+  { emoji:'📞', title:'给一个好久没联系的人发消息', desc:'不用想太多，就发一句"突然想到你，最近怎么样"。对方大概率会开心。', type:'social', time:5 },
+  { emoji:'☕', title:'约人喝杯东西', desc:'现在发消息给一个人："有空出来坐坐？就一杯咖啡的时间。"行动比犹豫容易。', type:'social', time:60 },
+  { emoji:'🙋', title:'夸一个陌生人', desc:'在便利店夸收银员的耳环，在小区夸邻居的狗。真诚的夸奖免费，但效果惊人。', type:'social', time:5 },
+  { emoji:'🎲', title:'拉人玩桌游', desc:'线上也可以——约朋友玩一局谁是卧底或者 UNO。笑声是最好的社交货币。', type:'social', time:60 },
+  { emoji:'💌', title:'给爸妈发个语音', desc:'不用说什么大事，就说"没事，就想起你们了"。这句对他们来说比什么都重要。', type:'social', time:5 },
+  { emoji:'🤝', title:'参加一个同城活动', desc:'豆瓣同城看看，读书会、桌游局、羽毛球——去认识一群陌生人。', type:'social', time:60 },
+  { emoji:'🐕', title:'去撸邻居的狗', desc:'看到遛狗的邻居，过去问"可以摸一下吗"。狗和狗主人一般都不会拒绝。', type:'social', time:5 },
+
+  // ---- 放松 ----
+  { emoji:'🫧', title:'洗个漫长的热水澡', desc:'不开音乐不听播客，就是淋热水。让蒸汽充满浴室，什么都不想。', type:'chill', time:30 },
+  { emoji:'☕', title:'泡杯东西慢慢喝', desc:'茶、咖啡、热巧克力都行。不看手机，就盯着窗外或者天花板，一口一口喝完。', type:'chill', time:15 },
+  { emoji:'😴', title:'闭眼躺 10 分钟', desc:'不是睡觉，就是闭眼。脑子里有声音没关系，让它飘。10分钟后你看到的世界不一样。', type:'chill', time:15 },
+  { emoji:'🎧', title:'戴上耳机听一张专辑', desc:'完整地听一张专辑，不是单曲循环，不是刷到哪听哪。像以前那样从头到尾。', type:'chill', time:30 },
+  { emoji:'🌅', title:'去看日落', desc:'查今天的日落时间。提前十分钟找个能看到天空的地方坐着，看到太阳完全下去。', type:'chill', time:30 },
+  { emoji:'📝', title:'写下你此刻的十个念头', desc:'不用整理，想到什么写什么。写完看看，你会更了解现在的自己。', type:'chill', time:5 },
+  { emoji:'🕯️', title:'点一根蜡烛发呆', desc:'就看着火苗晃。人类看了几千年火了，这东西对大脑有奇效。', type:'chill', time:15 },
+  { emoji:'🤲', title:'做个一分钟呼吸练习', desc:'吸气4秒，憋住4秒，呼气6秒。重复5次。这是最便宜的镇静剂。', type:'chill', time:5 },
+  { emoji:'🌟', title:'躺在地上看天花板', desc:'换个视角。躺下来看房间，一切看起来都不一样。你可能会想到一些坐着想不到的。', type:'chill', time:5 },
+  { emoji:'🍵', title:'做一杯手冲 / 泡功夫茶', desc:'慢慢来，享受过程。不是喝，是做。每一步都慢一点，这是你的仪式感。', type:'chill', time:15 },
+];
+
+// ============ 状态 ============
+let currentType = 'all';
+let currentTime = 'all';
+let count = 0;
+let currentActivity = null;
+let seen = [];
+
+const card = document.getElementById('card');
+const counter = document.getElementById('counter');
+const likeBtn = document.getElementById('likeBtn');
+const toast = document.getElementById('toast');
+
+// ============ 筛选标签 ============
+document.getElementById('typeTags').addEventListener('click', e => {
+  if (e.target.classList.contains('tag')) {
+    document.querySelectorAll('#typeTags .tag').forEach(t => t.classList.remove('on'));
+    e.target.classList.add('on');
+    currentType = e.target.dataset.type;
+    roll();
+  }
+});
+
+document.getElementById('timeBtns').addEventListener('click', e => {
+  if (e.target.classList.contains('time-btn')) {
+    document.querySelectorAll('#timeBtns .time-btn').forEach(t => t.classList.remove('on'));
+    e.target.classList.add('on');
+    currentTime = e.target.dataset.time;
+    roll();
+  }
+});
+
+// ============ 核心：抽一个活动 ============
+function getFiltered() {
+  return activities.filter(a => {
+    if (currentType !== 'all' && a.type !== currentType) return false;
+    if (currentTime !== 'all') {
+      const max = parseInt(currentTime);
+      if (max === 60) return a.time >= 30;
+      if (max === 30) return a.time >= 15 && a.time <= 30;
+      if (max === 15) return a.time >= 5 && a.time <= 15;
+      if (max === 5) return a.time <= 5;
+    }
+    return true;
+  });
+}
+
+function roll() {
+  const pool = getFiltered();
+
+  if (pool.length === 0) {
+    showResult({ emoji:'😅', title:'这个组合没有选项', desc:'换个筛选条件试试？', type:'', time:0 });
+    return;
+  }
+
+  // 避免连续重复
+  let candidates = pool.filter(a => a !== currentActivity);
+  if (candidates.length === 0) candidates = pool;
+
+  // 优先没出现过的
+  let fresh = candidates.filter(a => !seen.includes(a.title));
+  const pick = fresh.length > 0
+    ? fresh[Math.floor(Math.random() * fresh.length)]
+    : candidates[Math.floor(Math.random() * candidates.length)];
+
+  seen.push(pick.title);
+  if (seen.length > 50) seen.shift();
+  currentActivity = pick;
+  count++;
+
+  showResult(pick);
+  counter.textContent = `已经帮你找到了 ${count} 个选项`;
+  likeBtn.style.display = 'block';
+}
+
+function showResult(activity) {
+  card.classList.add('flip');
+  card.classList.remove('init');
+
+  setTimeout(() => {
+    card.innerHTML = `
+      <div class="emoji">${activity.emoji}</div>
+      <div class="title">${activity.title}</div>
+      <div class="desc">${activity.desc}</div>
+      <div class="meta">
+        <span>⏱ ${activity.time}分钟</span>
+        <span>${typeLabel(activity.type)}</span>
+      </div>
+    `;
+    card.classList.remove('flip');
+  }, 200);
+}
+
+function typeLabel(t) {
+  const map = { move:'🏃 动一动', make:'✋ 动手', think:'🧠 动脑', social:'💬 社交', chill:'😌 放松' };
+  return map[t] || '';
+}
+
+function likeIt() {
+  showToast('❤️ 去吧！你会喜欢的～');
+}
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+// ============ 初始化 ============
+// 第一次自动展示一个
+setTimeout(() => roll(), 600);
+
+// ============ PWA 安装 ============
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // 用户点三次卡片后提示安装
+  let clickCount = 0;
+  document.getElementById('card').addEventListener('click', () => {
+    clickCount++;
+    if (clickCount === 5 && deferredPrompt) {
+      showToast('📲 点右上角「添加到桌面」就能像App一样用啦');
+      // 自动弹出安装提示
+      setTimeout(() => {
+        if (deferredPrompt) deferredPrompt.prompt();
+      }, 2000);
+    }
+  });
+});
+
+// iOS 提示横幅
+function showIOSBanner() {
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !navigator.standalone) {
+    setTimeout(() => {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:rgba(102,126,234,0.95);color:#fff;padding:12px 16px;font-size:13px;text-align:center;z-index:99;';
+      banner.innerHTML = '📲 点击下方 <b>分享</b> → <b>添加到主屏幕</b>，像App一样使用';
+      banner.onclick = () => banner.remove();
+      document.body.prepend(banner);
+      setTimeout(() => banner.remove(), 5000);
+    }, 3000);
+  }
+}
+showIOSBanner();
+</script>
+</body>
+</html>

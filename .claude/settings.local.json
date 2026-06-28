@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export OLLAMA_MODELS=\"D:\\\\OllamaModels\")",
+      "Bash(taskkill /F /IM \"ollama.exe\")",
+      "Bash(export OLLAMA_MODELS=\"D:\\\\\\\\OllamaModels\")",
+      "Bash(\"C:\\\\\\\\Users\\\\\\\\acer\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Programs\\\\\\\\Ollama\\\\\\\\ollama.exe\" serve *)",
+      "Bash(curl -s http://localhost:11434/api/tags)"
+    ]
+  }
+}
