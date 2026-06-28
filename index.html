@@ -271,66 +271,32 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ============ 活动库 ============
-// type: move / make / think / social / chill
-// time: 分钟数
+// ============ 活动库（从 data.json 加载，支持热更新）============
+let activities = [];
 
-const activities = [
-  // ---- 动一动 ----
-  { emoji:'🧘', title:'做 5 分钟拉伸', desc:'站起来，把手臂举过头顶，弯腰摸脚趾。你的脊椎会感谢你。', type:'move', time:5 },
-  { emoji:'🚶', title:'出去走一圈', desc:'不用很远，楼下绕一圈就行。换口气，看看天，感受风吹在脸上。', type:'move', time:15 },
-  { emoji:'💃', title:'放首歌，乱跳', desc:'关上门，放最嗨的歌，怎么跳都行，反正没人看。跳到出汗为止。', type:'move', time:15 },
-  { emoji:'🧹', title:'收拾一个角落', desc:'不是大扫除。就整理一张桌子、一个抽屉。干净的环境会让脑子也变清爽。', type:'move', time:15 },
-  { emoji:'🏃', title:'原地高抬腿 100 下', desc:'做完你会喘、会热、会觉得活着真好。然后喝一大杯水。', type:'move', time:5 },
-  { emoji:'🪴', title:'给植物浇水 / 去买一盆', desc:'照顾一个活的东西，看它生长。没有植物的话，去楼下花店买盆多肉。', type:'move', time:15 },
-  { emoji:'🚴', title:'骑共享单车兜风', desc:'不要目的地，就沿着一条没走过的路骑。注意安全，戴耳机听首歌。', type:'move', time:30 },
-  { emoji:'🧗', title:'去最近的公园走一圈', desc:'手机放口袋。数你看到了几只鸟、几条狗。跟遛弯的大爷点头打招呼。', type:'move', time:30 },
-  { emoji:'🏊', title:'去游泳', desc:'泡在水里的感觉跟人间任何一个姿势都不一样。不会游就泡着。', type:'move', time:60 },
-  { emoji:'🥾', title:'选一条没走过的小路', desc:'打开地图，找一条你没去过的街，走过去看看有什么。探险不需要去远方。', type:'move', time:60 },
-
-  // ---- 动手做 ----
-  { emoji:'🍳', title:'做一道没做过的菜', desc:'打开冰箱看看有什么。搜个菜谱跟着做。做成什么样都行，重点是过程。', type:'make', time:30 },
-  { emoji:'✍️', title:'手写一封信', desc:'写给谁都行——给十年后的自己，给一个老朋友，给今天帮了你的陌生人。用纸和笔。', type:'make', time:30 },
-  { emoji:'🎨', title:'画一张画', desc:'不用好看。拿张纸和笔，画你窗外的样子，或者画你脑子里乱七八糟的线条。', type:'make', time:15 },
-  { emoji:'📦', title:'扔掉 3 件不用的东西', desc:'断舍离入门版：找三件超过一年没碰过的东西，丢了或送人。', type:'make', time:15 },
-  { emoji:'🪡', title:'缝个扣子 / 补件衣服', desc:'那件掉了一个扣子的衬衫等你很久了。针线活比刷手机更有成就感。', type:'make', time:15 },
-  { emoji:'🎵', title:'整理你的歌单', desc:'建一个新歌单，用你此刻的心情命名。加 10 首歌进去，以后这就是你的"某年某月"。', type:'make', time:15 },
-  { emoji:'📱', title:'清理手机相册', desc:'删掉截图、重复照片、模糊的图。释放空间的同时释放大脑。', type:'make', time:15 },
-  { emoji:'🧩', title:'拼拼图 / 玩乐高', desc:'专注在形状和颜色上，让大脑暂时离开焦虑。手上有事做的时候，心最安静。', type:'make', time:60 },
-  { emoji:'✂️', title:'做手工', desc:'折纸、剪纸、捏黏土、编绳——手在忙的时候，脑子才有机会休息。', type:'make', time:30 },
-
-  // ---- 动脑子 ----
-  { emoji:'📖', title:'读一章书', desc:'不是刷手机看文章。拿一本真正的书，读一章。哪怕就读三页。', type:'think', time:15 },
-  { emoji:'🧩', title:'做一道数独 / 填字', desc:'让大脑换个频道。比刷短视频少一些空虚，多一些"我还可以啊"的感觉。', type:'think', time:15 },
-  { emoji:'🌍', title:'在维基百科随机漫游', desc:'点"随机条目"，读一个你完全不知道的东西。五分钟你就比刚才多知道了一点世界。', type:'think', time:15 },
-  { emoji:'✏️', title:'写日记', desc:'就写今天的三件事：一件开心的、一件不开心的、一件奇怪的。不写给别人看。', type:'think', time:15 },
-  { emoji:'🗣️', title:'学一句方言', desc:'搜你老家或者你喜欢的城市的方言，学一句。下次跟人说，对方会惊喜。', type:'think', time:5 },
-  { emoji:'🧮', title:'算算你这个月花了多少钱', desc:'打开支付记录，不用记很细，就看看大头花在哪。清醒了再继续。', type:'think', time:15 },
-  { emoji:'🎓', title:'学一个新技能', desc:'网上找个 15 分钟教程——折纸、魔术、Excel快捷键、手语字母表，什么都行。', type:'think', time:15 },
-  { emoji:'🗺️', title:'计划一次周末出行', desc:'不用真的去，只是查路线、查吃的、查住的地方。幻想本身就是一种享受。', type:'think', time:30 },
-  { emoji:'♟️', title:'跟 AI 下盘棋', desc:'象棋围棋五子棋都行。输赢不重要，让大脑换种方式运转。', type:'think', time:30 },
-
-  // ---- 社交 ----
-  { emoji:'📞', title:'给一个好久没联系的人发消息', desc:'不用想太多，就发一句"突然想到你，最近怎么样"。对方大概率会开心。', type:'social', time:5 },
-  { emoji:'☕', title:'约人喝杯东西', desc:'现在发消息给一个人："有空出来坐坐？就一杯咖啡的时间。"行动比犹豫容易。', type:'social', time:60 },
-  { emoji:'🙋', title:'夸一个陌生人', desc:'在便利店夸收银员的耳环，在小区夸邻居的狗。真诚的夸奖免费，但效果惊人。', type:'social', time:5 },
-  { emoji:'🎲', title:'拉人玩桌游', desc:'线上也可以——约朋友玩一局谁是卧底或者 UNO。笑声是最好的社交货币。', type:'social', time:60 },
-  { emoji:'💌', title:'给爸妈发个语音', desc:'不用说什么大事，就说"没事，就想起你们了"。这句对他们来说比什么都重要。', type:'social', time:5 },
-  { emoji:'🤝', title:'参加一个同城活动', desc:'豆瓣同城看看，读书会、桌游局、羽毛球——去认识一群陌生人。', type:'social', time:60 },
-  { emoji:'🐕', title:'去撸邻居的狗', desc:'看到遛狗的邻居，过去问"可以摸一下吗"。狗和狗主人一般都不会拒绝。', type:'social', time:5 },
-
-  // ---- 放松 ----
-  { emoji:'🫧', title:'洗个漫长的热水澡', desc:'不开音乐不听播客，就是淋热水。让蒸汽充满浴室，什么都不想。', type:'chill', time:30 },
-  { emoji:'☕', title:'泡杯东西慢慢喝', desc:'茶、咖啡、热巧克力都行。不看手机，就盯着窗外或者天花板，一口一口喝完。', type:'chill', time:15 },
-  { emoji:'😴', title:'闭眼躺 10 分钟', desc:'不是睡觉，就是闭眼。脑子里有声音没关系，让它飘。10分钟后你看到的世界不一样。', type:'chill', time:15 },
-  { emoji:'🎧', title:'戴上耳机听一张专辑', desc:'完整地听一张专辑，不是单曲循环，不是刷到哪听哪。像以前那样从头到尾。', type:'chill', time:30 },
-  { emoji:'🌅', title:'去看日落', desc:'查今天的日落时间。提前十分钟找个能看到天空的地方坐着，看到太阳完全下去。', type:'chill', time:30 },
-  { emoji:'📝', title:'写下你此刻的十个念头', desc:'不用整理，想到什么写什么。写完看看，你会更了解现在的自己。', type:'chill', time:5 },
-  { emoji:'🕯️', title:'点一根蜡烛发呆', desc:'就看着火苗晃。人类看了几千年火了，这东西对大脑有奇效。', type:'chill', time:15 },
-  { emoji:'🤲', title:'做个一分钟呼吸练习', desc:'吸气4秒，憋住4秒，呼气6秒。重复5次。这是最便宜的镇静剂。', type:'chill', time:5 },
-  { emoji:'🌟', title:'躺在地上看天花板', desc:'换个视角。躺下来看房间，一切看起来都不一样。你可能会想到一些坐着想不到的。', type:'chill', time:5 },
-  { emoji:'🍵', title:'做一杯手冲 / 泡功夫茶', desc:'慢慢来，享受过程。不是喝，是做。每一步都慢一点，这是你的仪式感。', type:'chill', time:15 },
-];
+async function loadActivities() {
+  try {
+    const resp = await fetch('data.json');
+    if (resp.ok) {
+      activities = await resp.json();
+      console.log('✅ 已加载 ' + activities.length + ' 条活动');
+    }
+  } catch (e) {
+    console.log('⚠️ 加载失败，使用内置数据');
+  }
+  // 内置兜底
+  if (!activities.length) {
+    activities = [
+      { emoji:'🧘', title:'做 5 分钟拉伸', desc:'站起来，把手臂举过头顶，弯腰摸脚趾。你的脊椎会感谢你。', type:'move', time:5 },
+      { emoji:'🚶', title:'出去走一圈', desc:'换口气，看看天，感受风吹在脸上。', type:'move', time:15 },
+      { emoji:'📖', title:'读一章书', desc:'拿一本真正的书，读一章。哪怕就读三页。', type:'think', time:15 },
+      { emoji:'🍳', title:'做一道没做过的菜', desc:'打开冰箱看看有什么，跟着菜谱做。', type:'make', time:30 },
+      { emoji:'📞', title:'给一个好久没联系的人发消息', desc:'发一句"突然想到你，最近怎么样"。', type:'social', time:5 },
+      { emoji:'😴', title:'闭眼躺 10 分钟', desc:'不是睡觉，就是闭眼。让脑子里声音飘。', type:'chill', time:15 },
+    ];
+  }
+  roll(); // 加载完立刻展示
+}
 
 // ============ 状态 ============
 let currentType = 'all';
@@ -440,8 +406,8 @@ function showToast(msg) {
 }
 
 // ============ 初始化 ============
-// 一加载就出结果
-roll();
+// 启动：先加载数据再展示
+loadActivities();
 
 // ============ PWA 安装 ============
 if ('serviceWorker' in navigator) {
